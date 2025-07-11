@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal de Medidas Corporales</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow: hidden;
+            position: relative;
+            animation: modalAppear 0.3s ease-out;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1a252f, #2c3e50);
+            color: white;
+            padding: 0;
+            position: relative;
+        }
+
+        .modal-header-top {
+            padding: 20px 25px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-date {
+            font-size: 14px;
+            color: #bdc3c7;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 0;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .tab.active {
+            color: white;
+            background: rgba(52, 152, 219, 0.3);
+            border-top: 3px solid #3498db;
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 50vh;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .medidas-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .medida-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 20px;
+            align-items: center;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .medida-row:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .medida-label {
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .medida-input {
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .medida-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .medida-input::placeholder {
+            color: #95a5a6;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .add-medida-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            align-self: flex-start;
+        }
+
+        .add-medida-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .doctor-info {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .doctor-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .doctor-details {
+            font-size: 12px;
+            color: #7f8c8d;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .doctor-details:hover {
+            color: #3498db;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: none;
+        }
+
+        .btn-secondary {
+            background: #7f8c8d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #6c7b7d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(127, 140, 141, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2980b9, #1f618d);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .modal {
+                width: 95%;
+                margin: 10px;
+            }
+            
+            .medida-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .modal-body {
+                padding: 20px;
+            }
+            
+            .modal-footer {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+
+            .modal-header-top {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-header-top">
+                    <h2 class="modal-title">Medidas corporales</h2>
+                    <div class="modal-date">30/05/2025</div>
+                </div>
+                <div class="modal-tabs">
+                    <button class="tab" onclick="switchTab('detalles')">Detalles de la consulta</button>
+                    <button class="tab active" onclick="switchTab('medidas')">Medidas corporales</button>
+                    <button class="tab" onclick="switchTab('tratamiento')">Tratamiento</button>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <div class="medidas-container">
+                    <div class="medida-row">
+                        <div class="medida-label">Medida corporal a registrar</div>
+                        <input type="text" class="medida-input" placeholder="Valor registrado">
+                        <button class="delete-btn" onclick="deleteMedida(this)">🗑️</button>
+                    </div>
+                    
+                    <div class="medida-row">
+                        <div class="medida-label">Medida corporal a registrar</div>
+                        <input type="text" class="medida-input" placeholder="Valor registrado">
+                        <button class="delete-btn" onclick="deleteMedida(this)">🗑️</button>
+                    </div>
+                    
+                    <button class="add-medida-btn" onclick="addMedida()">
+                        <span>+</span>
+                        Añadir medida corporal
+                    </button>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <div class="doctor-info">
+                    <div class="doctor-name">Dr. Luis Ramiro Acosta Estrada</div>
+                    <div class="doctor-details">
+                        Más detalles ▼
+                    </div>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <button class="btn btn-secondary" onclick="closeModal()">Anterior</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Siguiente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Remover clase active de todas las pestañas
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Agregar clase active a la pestaña clickeada
+            event.target.classList.add('active');
+            
+            // Aquí puedes agregar lógica para cambiar el contenido según la pestaña
+            console.log('Cambiando a pestaña:', tabName);
+        }
+        
+        function closeModal() {
+            document.querySelector('.modal-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.querySelector('.modal-overlay').style.display = 'none';
+            }, 300);
+        }
+        
+        function nextStep() {
+            alert('Avanzando al siguiente paso...');
+        }
+        
+        function addMedida() {
+            const container = document.querySelector('.medidas-container');
+            const addButton = document.querySelector('.add-medida-btn');
+            
+            const newRow = document.createElement('div');
+            newRow.className = 'medida-row';
+            newRow.innerHTML = `
+                <div class="medida-label">Medida corporal a registrar</div>
+                <input type="text" class="medida-input" placeholder="Valor registrado">
+                <button class="delete-btn" onclick="deleteMedida(this)">🗑️</button>
+            `;
+            
+            container.insertBefore(newRow, addButton);
+            
+            // Animación de aparición
+            newRow.style.opacity = '0';
+            newRow.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                newRow.style.transition = 'all 0.3s ease';
+                newRow.style.opacity = '1';
+                newRow.style.transform = 'translateY(0)';
+            }, 10);
+        }
+        
+        function deleteMedida(button) {
+            const row = button.closest('.medida-row');
+            row.style.transform = 'translateX(100%)';
+            row.style.opacity = '0';
+            setTimeout(() => {
+                row.remove();
+            }, 300);
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        document.querySelector('.modal-overlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

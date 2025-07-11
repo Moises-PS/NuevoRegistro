@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal de Tratamiento</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #4a6fa5 0%, #5a7fb3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            position: relative;
+            animation: modalAppear 0.3s ease-out;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #34495e, #2c3e50);
+            color: white;
+            padding: 0;
+            position: relative;
+        }
+
+        .modal-tabs {
+            display: flex;
+            background: transparent;
+            border-bottom: none;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 16px 24px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+            position: relative;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 3px solid #4a90e2;
+        }
+
+        .modal-date {
+            position: absolute;
+            top: 16px;
+            right: 24px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 16px;
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 60vh;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .prescription-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e9ecef;
+        }
+
+        .prescription-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .add-prescription {
+            background: #f8f9fa;
+            border: 2px dashed #4a90e2;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .add-prescription:hover {
+            background: #e3f2fd;
+            border-color: #357abd;
+        }
+
+        .add-prescription-btn {
+            background: none;
+            border: none;
+            color: #4a90e2;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 auto;
+        }
+
+        .add-prescription-btn:hover {
+            color: #357abd;
+        }
+
+        .plus-icon {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .doctor-info {
+            background: #34495e;
+            color: white;
+            padding: 20px;
+            border-radius: 0 0 12px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .doctor-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .doctor-details {
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .doctor-details:hover {
+            color: white;
+        }
+
+        .modal-footer {
+            background: #34495e;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: 2px solid #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: #4a90e2;
+            color: white;
+            border: 2px solid #4a90e2;
+        }
+
+        .btn-primary:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+        }
+
+        .more-actions {
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .more-actions:hover {
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .modal {
+                width: 95%;
+                margin: 10px;
+            }
+            
+            .prescription-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-body {
+                padding: 20px;
+            }
+            
+            .modal-footer {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+
+            .modal-date {
+                position: static;
+                margin: 10px 0;
+                display: inline-block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-date">30/05/2025</div>
+                <div class="modal-tabs">
+                    <button class="tab" onclick="switchTab('detalles')">Detalles de la consulta</button>
+                    <button class="tab" onclick="switchTab('medidas')">Medidas corporales</button>
+                    <button class="tab active" onclick="switchTab('tratamiento')">Tratamiento</button>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <div class="prescription-container" style="position: relative;">
+                    <button class="delete-btn" onclick="deletePrescription(this)">🗑️</button>
+                    <div class="prescription-form">
+                        <div class="form-group">
+                            <label for="medicamento1">Nombre del medicamento</label>
+                            <input type="text" id="medicamento1" placeholder="Ingrese el nombre del medicamento">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="tipo1">Tipo de medicamento</label>
+                            <select id="tipo1">
+                                <option value="">Seleccione el tipo</option>
+                                <option value="tableta">Tableta</option>
+                                <option value="capsula">Cápsula</option>
+                                <option value="jarabe">Jarabe</option>
+                                <option value="inyeccion">Inyección</option>
+                                <option value="crema">Crema</option>
+                                <option value="gotas">Gotas</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dosis1">Dosis</label>
+                            <input type="text" id="dosis1" placeholder="Ej: 500mg">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="tiempo1">Tiempo entre dosis</label>
+                            <input type="text" id="tiempo1" placeholder="Ej: 8 horas">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="duracion1">Duración</label>
+                            <input type="text" id="duracion1" placeholder="Ej: 7 días">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="add-prescription" onclick="addPrescription()">
+                    <button class="add-prescription-btn">
+                        <span class="plus-icon">+</span>
+                        Añadir prescripción
+                    </button>
+                </div>
+            </div>
+            
+            <div class="doctor-info">
+                <div class="doctor-name">Dr. Luis Ramiro Acosta Estrada</div>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="doctor-details" onclick="toggleDoctorDetails()">
+                        Más detalles ▼
+                    </div>
+                    <div class="more-actions">⋮</div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="previousStep()">Anterior</button>
+                <button class="btn btn-primary" onclick="saveRecord()">Guardar registro</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let prescriptionCounter = 1;
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            event.target.classList.add('active');
+            console.log('Cambiando a pestaña:', tabName);
+        }
+        
+        function addPrescription() {
+            prescriptionCounter++;
+            const container = document.querySelector('.modal-body');
+            const addButton = document.querySelector('.add-prescription');
+            
+            const newPrescription = document.createElement('div');
+            newPrescription.className = 'prescription-container';
+            newPrescription.style.position = 'relative';
+            newPrescription.innerHTML = `
+                <button class="delete-btn" onclick="deletePrescription(this)">🗑️</button>
+                <div class="prescription-form">
+                    <div class="form-group">
+                        <label for="medicamento${prescriptionCounter}">Nombre del medicamento</label>
+                        <input type="text" id="medicamento${prescriptionCounter}" placeholder="Ingrese el nombre del medicamento">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tipo${prescriptionCounter}">Tipo de medicamento</label>
+                        <select id="tipo${prescriptionCounter}">
+                            <option value="">Seleccione el tipo</option>
+                            <option value="tableta">Tableta</option>
+                            <option value="capsula">Cápsula</option>
+                            <option value="jarabe">Jarabe</option>
+                            <option value="inyeccion">Inyección</option>
+                            <option value="crema">Crema</option>
+                            <option value="gotas">Gotas</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dosis${prescriptionCounter}">Dosis</label>
+                        <input type="text" id="dosis${prescriptionCounter}" placeholder="Ej: 500mg">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tiempo${prescriptionCounter}">Tiempo entre dosis</label>
+                        <input type="text" id="tiempo${prescriptionCounter}" placeholder="Ej: 8 horas">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="duracion${prescriptionCounter}">Duración</label>
+                        <input type="text" id="duracion${prescriptionCounter}" placeholder="Ej: 7 días">
+                    </div>
+                </div>
+            `;
+            
+            container.insertBefore(newPrescription, addButton);
+        }
+        
+        function deletePrescription(button) {
+            const prescriptionContainer = button.closest('.prescription-container');
+            prescriptionContainer.remove();
+        }
+        
+        function toggleDoctorDetails() {
+            const detailsElement = document.querySelector('.doctor-details');
+            const isExpanded = detailsElement.textContent.includes('▲');
+            
+            detailsElement.textContent = isExpanded ? 'Más detalles ▼' : 'Más detalles ▲';
+            
+            // Aquí puedes agregar lógica para mostrar/ocultar detalles adicionales
+            console.log('Toggling doctor details');
+        }
+        
+        function previousStep() {
+            console.log('Paso anterior');
+        }
+        
+        function saveRecord() {
+            console.log('Guardando registro...');
+            alert('Registro guardado exitosamente');
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        document.querySelector('.modal-overlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                document.querySelector('.modal-overlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.querySelector('.modal-overlay').style.display = 'none';
+                }, 300);
+            }
+        });
+    </script>
+</body>
+</html>

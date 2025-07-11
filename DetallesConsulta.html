@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal de Registro Médico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            position: relative;
+            animation: modalAppear 0.3s ease-out;
+        }
+
+        @keyframes modalAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 20px;
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .modal-date {
+            font-size: 14px;
+            opacity: 0.9;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            margin-top: 10px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.5);
+            color: #495057;
+        }
+
+        .tab.active {
+            color: white;
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #4a90e2;
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(106, 117, 125, 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #357abd, #2a5f94);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+
+        .doctor-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #4a90e2;
+        }
+
+        .doctor-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .doctor-details {
+            font-size: 14px;
+            color: #6c757d;
+            cursor: pointer;
+        }
+
+        .doctor-details:hover {
+            color: #4a90e2;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .modal {
+                width: 95%;
+                margin: 10px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .modal-body {
+                padding: 20px;
+            }
+            
+            .modal-footer {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+
+            .modal-date {
+                position: static;
+                margin-top: 10px;
+                display: inline-block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Detalles de la consulta</h2>
+                <div class="modal-date">30/05/2025</div>
+                <div class="modal-tabs">
+                    <button class="tab" onclick="switchTab('detalles')">Detalles de la consulta</button>
+                    <button class="tab active" onclick="switchTab('medidas')">Medidas corporales</button>
+                    <button class="tab" onclick="switchTab('tratamiento')">Tratamiento</button>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="diagnostico">Diagnóstico</label>
+                        <input type="text" id="diagnostico" placeholder="Ingrese el diagnóstico">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fecha">Fecha de la consulta</label>
+                        <input type="date" id="fecha" value="2025-05-30">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="centro">Centro médico</label>
+                        <input type="text" id="centro" placeholder="Nombre del centro médico">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="doctor">Nombre del doctor</label>
+                        <input type="text" id="doctor" placeholder="Nombre del doctor">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="observaciones">Observaciones</label>
+                        <textarea id="observaciones" placeholder="Ingrese observaciones adicionales..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="doctor-info">
+                    <div class="doctor-name">Dr. Luis Ramiro Acosta Estrada</div>
+                    <div class="doctor-details">Más detalles ▼</div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Anterior</button>
+                <button class="btn btn-primary" onclick="nextStep()">Siguiente</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Remover clase active de todas las pestañas
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Agregar clase active a la pestaña clickeada
+            event.target.classList.add('active');
+            
+            // Aquí puedes agregar lógica para cambiar el contenido según la pestaña
+            console.log('Cambiando a pestaña:', tabName);
+        }
+        
+        function closeModal() {
+            document.querySelector('.modal-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.querySelector('.modal-overlay').style.display = 'none';
+            }, 300);
+        }
+        
+        function nextStep() {
+            alert('Avanzando al siguiente paso...');
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        document.querySelector('.modal-overlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
